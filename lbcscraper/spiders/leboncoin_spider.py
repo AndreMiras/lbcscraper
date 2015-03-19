@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from lbcscraper.items import LbcItem
+from lbcscraper.items import LbcPropertyItem
 
 
 class LeboncoinSpider(scrapy.Spider):
@@ -26,7 +26,7 @@ class LeboncoinSpider(scrapy.Spider):
     def parse(self, response):
         ads_elems = response.xpath('//div[@class="list-lbc"]/a')
         for ad_elem in ads_elems:
-            item = LbcItem()
+            item = LbcPropertyItem()
             link = ad_elem.xpath('@href').extract()
             item['link'] = link
             details_elem = ad_elem.xpath('div[@class="lbc"]/div[@class="detail"]')

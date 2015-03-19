@@ -7,12 +7,12 @@
 
 import scrapy
 
-
 class LbcItem(scrapy.Item):
-    # define the fields for your item here like:
     title = scrapy.Field()
     link = scrapy.Field()
     city = scrapy.Field()
     postcode = scrapy.Field()
     price = scrapy.Field()
+
+class LbcPropertyItem(LbcItem):
     surface_area = scrapy.Field()
