@@ -14,7 +14,7 @@ class LeboncoinSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs): 
         """
         Retrieves start_url from command line options:
-        scrapy crawl leboncoin -a start_url="http://www.leboncoin.fr/ventes_immobilieres/offres/languedoc_roussillon/herault/"
+        scrapy crawl leboncoin -a start_url="http://www.leboncoin.fr/vetements/offres/languedoc_roussillon/herault/"
         """
         super(LeboncoinSpider, self).__init__(*args, **kwargs) 
         self.start_urls = [kwargs.get('start_url')] 
@@ -41,11 +41,21 @@ class LeboncoinSpider(scrapy.Spider):
 
     def parse_details(self, response):
         item = response.meta['item']
-        surface_area = response.xpath('//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "Surface :")]/following-sibling::td/text()').extract()
-        item['surface_area'] = [s.replace(" m", "") for s in surface_area]
         city = response.xpath('//table/tr/th[contains(text(), "Ville :")]/following-sibling::td/text()').extract()
         item['city'] = city
         postcode = response.xpath('//table/tr/th[contains(text(), "Code postal :")]/following-sibling::td/text()').extract()
         item['postcode'] = postcode
         # yield item
+        return item
+
+class LeboncoinPropertySpider(LeboncoinSpider):
+    """
+    scrapy crawl leboncoin_property -a start_url="http://www.leboncoin.fr/ventes_immobilieres/offres/languedoc_roussillon/herault/"
+    """
+    name = "leboncoin_property"
+
+    def parse_details(self, response):
+        item = super(LeboncoinPropertySpider, self).parse_details(response)
+        surface_area = response.xpath('//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "Surface :")]/following-sibling::td/text()').extract()
+        item['surface_area'] = [s.replace(" m", "") for s in surface_area]
         return item
