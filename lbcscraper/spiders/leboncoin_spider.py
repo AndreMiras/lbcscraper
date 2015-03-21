@@ -13,11 +13,12 @@ class LeboncoinSpider(scrapy.Spider):
 
     def __init__(self, *args, **kwargs): 
         """
-        Retrieves start_url from command line options:
-        scrapy crawl leboncoin -a start_url="http://www.leboncoin.fr/vetements/offres/languedoc_roussillon/herault/"
+        Retrieves start_urls from command line options:
+        scrapy crawl leboncoin -a start_urls="http://www.leboncoin.fr/vetements/offres/languedoc_roussillon/herault/,http://www.leboncoin.fr/vetements/offres/languedoc_roussillon/herault/"
         """
         super(LeboncoinSpider, self).__init__(*args, **kwargs) 
-        self.start_urls = [kwargs.get('start_url')] 
+        start_urls = kwargs.get('start_urls')
+        self.start_urls = start_urls and start_urls.split(',') or []
 
     def custom_start_requests(self):
         for url in self.start_urls:
@@ -27,35 +28,42 @@ class LeboncoinSpider(scrapy.Spider):
         ads_elems = response.xpath('//div[@class="list-lbc"]/a')
         for ad_elem in ads_elems:
             item = LbcPropertyItem()
-            link = ad_elem.xpath('@href').extract()
-            item['link'] = link
+            links = ad_elem.xpath('@href').extract()
+            item['link'] = links[0]
             details_elem = ad_elem.xpath('div[@class="lbc"]/div[@class="detail"]')
-            title = details_elem.xpath('div[@class="title"]/text()').extract()
-            item['title'] = [s.strip() for s in title]
-            price = details_elem.xpath('div[@class="price"]/text()').extract()
-            item['price'] = [s.replace(u"\xa0€", "").replace(" ", "").strip() for s in price]
-            request = scrapy.Request(link[0], callback=self.parse_details)
+            titles = details_elem.xpath('div[@class="title"]/text()').extract()
+            titles_cleaned = [s.strip() for s in titles]
+            item['title'] = titles_cleaned[0]
+            prices = details_elem.xpath('div[@class="price"]/text()').extract()
+            prices_cleaned = [s.replace(u"\xa0€", "").replace(" ", "").strip() for s in prices]
+            if prices_cleaned:
+                item['price'] = prices_cleaned[0]
+            request = scrapy.Request(links[0], callback=self.parse_details)
             request.meta['item'] = item
             # yield item
             yield request
 
     def parse_details(self, response):
         item = response.meta['item']
-        city = response.xpath('//table/tr/th[contains(text(), "Ville :")]/following-sibling::td/text()').extract()
-        item['city'] = city
-        postcode = response.xpath('//table/tr/th[contains(text(), "Code postal :")]/following-sibling::td/text()').extract()
-        item['postcode'] = postcode
+        cities = response.xpath('//table/tr/th[contains(text(), "Ville :")]/following-sibling::td/text()').extract()
+        if cities:
+            item['city'] = cities[0]
+        postcodes = response.xpath('//table/tr/th[contains(text(), "Code postal :")]/following-sibling::td/text()').extract()
+        if postcodes:
+            item['postcode'] = postcodes[0]
         # yield item
         return item
 
 class LeboncoinPropertySpider(LeboncoinSpider):
     """
-    scrapy crawl leboncoin_property -a start_url="http://www.leboncoin.fr/ventes_immobilieres/offres/languedoc_roussillon/herault/"
+    scrapy crawl leboncoin_property -a start_urls="http://www.leboncoin.fr/ventes_immobilieres/offres/languedoc_roussillon/herault/"
     """
     name = "leboncoin_property"
 
     def parse_details(self, response):
         item = super(LeboncoinPropertySpider, self).parse_details(response)
-        surface_area = response.xpath('//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "Surface :")]/following-sibling::td/text()').extract()
-        item['surface_area'] = [s.replace(" m", "") for s in surface_area]
+        surfaces_areas = response.xpath('//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "Surface :")]/following-sibling::td/text()').extract()
+        surfaces_areas_cleaned = [s.replace(" m", "") for s in surfaces_areas]
+        if surfaces_areas_cleaned:
+            item['surface_area'] = surfaces_areas_cleaned[0]
         return item

@@ -5,14 +5,14 @@
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/items.html
 
-import scrapy
+from scrapy import Item, Field
 
-class LbcItem(scrapy.Item):
-    title = scrapy.Field()
-    link = scrapy.Field()
-    city = scrapy.Field()
-    postcode = scrapy.Field()
-    price = scrapy.Field()
+class LbcItem(Item):
+    title = Field()
+    link = Field()
+    city = Field()
+    postcode = Field()
+    price = Field()
 
 class LbcPropertyItem(LbcItem):
-    surface_area = scrapy.Field()
+    surface_area = Field()
