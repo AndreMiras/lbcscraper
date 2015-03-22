@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 import re
 import scrapy
+from scrapy.contrib.spiders import CrawlSpider, Rule
+from scrapy.contrib.linkextractors import LinkExtractor
 from lbcscraper.items import LbcPropertyItem
 
 
-class LeboncoinSpider(scrapy.Spider):
+class LeboncoinSpider(CrawlSpider):
     name = "leboncoin"
     allowed_domains = ["leboncoin.fr"]
-    start_urls = (
-        # 'http://www.leboncoin.fr/',
-        # 'http://www.leboncoin.fr/ventes_immobilieres/offres/languedoc_roussillon/herault/',
+    rules = (
+        # follows next pages but stop at 9 to avoid crawling for too long
+        Rule(LinkExtractor(allow=['\?o=\d']), callback='parse_items'),
     )
 
     def __init__(self, *args, **kwargs): 
@@ -25,7 +27,10 @@ class LeboncoinSpider(scrapy.Spider):
         for url in self.start_urls:
             yield self.make_requests_from_url(url)
 
-    def parse(self, response):
+    def parse_start_url(self, response):
+        return self.parse_items(response)
+
+    def parse_items(self, response):
         ads_elems = response.xpath('//div[@class="list-lbc"]/a')
         for ad_elem in ads_elems:
             item = LbcPropertyItem()
@@ -42,12 +47,12 @@ class LeboncoinSpider(scrapy.Spider):
             photos = ad_elem.xpath('div[@class="lbc"]/div[@class="image"]/div[@class="image-and-nb"]/img/@src').extract()
             if photos:
                 item['photo'] = photos[0]
-            request = scrapy.Request(links[0], callback=self.parse_details)
+            request = scrapy.Request(links[0], callback=self.parse_item_details)
             request.meta['item'] = item
             # yield item
             yield request
 
-    def parse_details(self, response):
+    def parse_item_details(self, response):
         item = response.meta['item']
         cities = response.xpath('//table/tr/th[contains(text(), "Ville :")]/following-sibling::td/text()').extract()
         if cities:
@@ -64,8 +69,8 @@ class LeboncoinPropertySpider(LeboncoinSpider):
     """
     name = "leboncoin_property"
 
-    def parse_details(self, response):
-        item = super(LeboncoinPropertySpider, self).parse_details(response)
+    def parse_item_details(self, response):
+        item = super(LeboncoinPropertySpider, self).parse_item_details(response)
         surfaces_areas = response.xpath('//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "Surface :")]/following-sibling::td/text()').extract()
         surfaces_areas_cleaned = [float(s.replace(" m", "").replace(" ","")) for s in surfaces_areas]
         if surfaces_areas_cleaned:
