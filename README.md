@@ -23,7 +23,7 @@ Then load your items from Python:
  u'price': 12.0,
  u'title': u'Robe 2 en 1 taille 5 ans'}
 ```
-### Property spider & items
+### Property spider
 
 Run the property spider:
 ```shell
