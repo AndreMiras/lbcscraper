@@ -13,6 +13,7 @@ class LbcItem(Item):
     city = Field()
     postcode = Field()
     price = Field()
+    photo = Field()
 
 class LbcPropertyItem(LbcItem):
     surface_area = Field()

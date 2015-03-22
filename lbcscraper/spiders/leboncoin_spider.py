@@ -35,9 +35,12 @@ class LeboncoinSpider(scrapy.Spider):
             titles_cleaned = [s.strip() for s in titles]
             item['title'] = titles_cleaned[0]
             prices = details_elem.xpath('div[@class="price"]/text()').extract()
-            prices_cleaned = [s.replace(u"\xa0€", "").replace(" ", "").strip() for s in prices]
+            prices_cleaned = [float(s.replace(u"\xa0€", "").replace(" ", "").strip()) for s in prices]
             if prices_cleaned:
                 item['price'] = prices_cleaned[0]
+            photos = ad_elem.xpath('div[@class="lbc"]/div[@class="image"]/div[@class="image-and-nb"]/img/@src').extract()
+            if photos:
+                item['photo'] = photos[0]
             request = scrapy.Request(links[0], callback=self.parse_details)
             request.meta['item'] = item
             # yield item
@@ -63,7 +66,7 @@ class LeboncoinPropertySpider(LeboncoinSpider):
     def parse_details(self, response):
         item = super(LeboncoinPropertySpider, self).parse_details(response)
         surfaces_areas = response.xpath('//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "Surface :")]/following-sibling::td/text()').extract()
-        surfaces_areas_cleaned = [s.replace(" m", "") for s in surfaces_areas]
+        surfaces_areas_cleaned = [float(s.replace(" m", "")) for s in surfaces_areas]
         if surfaces_areas_cleaned:
             item['surface_area'] = surfaces_areas_cleaned[0]
         return item
