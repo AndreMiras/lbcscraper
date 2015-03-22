@@ -3,8 +3,11 @@ Scraper for Leboncoin.fr
 
 ## How to use
 
-Use the generic spider:
-  scrapy crawl leboncoin -a start_urls="http://www.leboncoin.fr/vetements/offres/languedoc_roussillon/herault/" -o items.js
+Run the generic spider from command line e.g. for dumping items to a json file:
+```shell
+$ scrapy crawl leboncoin -a start_urls="http://www.leboncoin.fr/vetements/offres/languedoc_roussillon/herault/" -o items.json
+  ```
+Then load your items from Python:
 ```python
 >>> import json
 >>> items = json.load(open('items.json'))
@@ -19,9 +22,11 @@ Use the generic spider:
  u'title': u'Robe 2 en 1 taille 5 ans'}
 ```
 
-Or a specialised one:
-  scrapy crawl leboncoin_property -a start_urls="http://www.leboncoin.fr/ventes_immobilieres/offres/languedoc_roussillon/herault/" -o properties.json
-
+Run a specialised spider:
+```shell
+$ scrapy crawl leboncoin_property -a start_urls="http://www.leboncoin.fr/ventes_immobilieres/offres/languedoc_roussillon/herault/" -o properties.json
+```
+Then from load json objects from Python:
 ```python
 >>> import json
 >>> properties = json.load(open('properties.json'))
