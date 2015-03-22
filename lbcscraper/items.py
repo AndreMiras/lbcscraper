@@ -14,6 +14,8 @@ class LbcItem(Item):
     postcode = Field()
     price = Field()
     photo = Field()
+    ges = Field()
+    energy_class = Field()
 
 class LbcPropertyItem(LbcItem):
     surface_area = Field()

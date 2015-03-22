@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 import scrapy
 from lbcscraper.items import LbcPropertyItem
 
@@ -69,4 +70,14 @@ class LeboncoinPropertySpider(LeboncoinSpider):
         surfaces_areas_cleaned = [float(s.replace(" m", "")) for s in surfaces_areas]
         if surfaces_areas_cleaned:
             item['surface_area'] = surfaces_areas_cleaned[0]
+        ges_list = response.xpath('//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "GES :")]/following-sibling::td/noscript/a/text()').extract()
+        if ges_list:
+            ges_match = re.search("([A-I])\s+\(de \d+ \\xe0 \d+\)", ges_list[0])
+        if ges_match:
+            item['ges'] = ges_match.group(1)
+        energy_classes = response.xpath(u'//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "Classe énergie :")]/following-sibling::td/noscript/a/text()').extract()
+        if energy_classes:
+            energy_class_match = re.search("([A-I])\s+\(de \d+ \\xe0 \d+\)", energy_classes[0])
+        if energy_class_match:
+            item['energy_class'] = energy_class_match.group(1)
         return item
