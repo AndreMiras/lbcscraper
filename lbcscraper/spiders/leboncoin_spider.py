@@ -37,7 +37,7 @@ class LeboncoinSpider(CrawlSpider):
             links = ad_elem.xpath('@href').extract()
             item['link'] = links[0]
             details_elem = ad_elem.xpath('div[@class="lbc"]/div[@class="detail"]')
-            titles = details_elem.xpath('div[@class="title"]/text()').extract()
+            titles = details_elem.xpath('h2[@class="title"]/text()').extract()
             titles_cleaned = [s.strip() for s in titles]
             item['title'] = titles_cleaned[0]
             prices = details_elem.xpath('div[@class="price"]/text()').extract()
