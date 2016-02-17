@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import scrapy
+from urlparse import urlparse
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors import LinkExtractor
 from lbcscraper.items import LbcPropertyItem
@@ -30,12 +31,36 @@ class LeboncoinSpider(CrawlSpider):
     def parse_start_url(self, response):
         return self.parse_items(response)
 
+    @staticmethod
+    def add_scheme_if_missing(url):
+        """
+        Adds the http:// scheme if missing in the URL.
+        >>> url = 'www.leboncoin.fr/'
+        >>> LeboncoinSpider.add_scheme_if_missing(url)
+        'http://www.leboncoin.fr/'
+        >>> url = '//www.leboncoin.fr/'
+        >>> LeboncoinSpider.add_scheme_if_missing(url)
+        'http://www.leboncoin.fr/'
+        >>> url = 'http://www.leboncoin.fr/'
+        >>> LeboncoinSpider.add_scheme_if_missing(url)
+        'http://www.leboncoin.fr/'
+        """
+        parsed_url = urlparse(url)
+        if not parsed_url.scheme:
+            # the '//' could or couldn't be omitted
+            if not url.startswith('//'):
+                url = '//' + url
+            url = 'http:' + url
+        return url
+
     def parse_items(self, response):
         ads_elems = response.xpath('//div[@class="list-lbc"]/a')
         for ad_elem in ads_elems:
             item = LbcPropertyItem()
             links = ad_elem.xpath('@href').extract()
-            item['link'] = links[0]
+            link = links[0]
+            link = LeboncoinSpider.add_scheme_if_missing(link)
+            item['link'] = link
             details_elem = ad_elem.xpath('div[@class="lbc"]/div[@class="detail"]')
             titles = details_elem.xpath('h2[@class="title"]/text()').extract()
             titles_cleaned = [s.strip() for s in titles]
@@ -46,8 +71,9 @@ class LeboncoinSpider(CrawlSpider):
                 item['price'] = prices_cleaned[0]
             photos = ad_elem.xpath('div[@class="lbc"]/div[@class="image"]/div[@class="image-and-nb"]/img/@src').extract()
             if photos:
-                item['photo'] = photos[0]
-            request = scrapy.Request(links[0], callback=self.parse_item_details)
+                photo = LeboncoinSpider.add_scheme_if_missing(photos[0])
+                item['photo'] = photo
+            request = scrapy.Request(link, callback=self.parse_item_details)
             request.meta['item'] = item
             # yield item
             yield request
