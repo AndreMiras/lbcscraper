@@ -98,7 +98,7 @@ class LeboncoinPropertySpider(LeboncoinSpider):
 
     def parse_item_details(self, response):
         item = super(LeboncoinPropertySpider, self).parse_item_details(response)
-        surfaces_areas = response.xpath('//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "Surface :")]/following-sibling::td/text()').extract()
+        surfaces_areas = response.xpath('//section[contains(@class, "properties")]/div/h2/span[contains(text(), "Surface")]/following-sibling::span/text()').extract()
         surfaces_areas_cleaned = [float(s.replace(" m", "").replace(" ","")) for s in surfaces_areas]
         if surfaces_areas_cleaned:
             item['surface_area'] = surfaces_areas_cleaned[0]
