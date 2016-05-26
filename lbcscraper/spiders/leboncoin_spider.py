@@ -98,16 +98,17 @@ class LeboncoinPropertySpider(LeboncoinSpider):
 
     def parse_item_details(self, response):
         item = super(LeboncoinPropertySpider, self).parse_item_details(response)
-        surfaces_areas = response.xpath('//section[contains(@class, "properties")]/div/h2/span[contains(text(), "Surface")]/following-sibling::span/text()').extract()
+        properties_elem = response.xpath('//section[contains(@class, "properties")]')
+        surfaces_areas = properties_elem.xpath('div/h2/span[contains(text(), "Surface")]/following-sibling::span/text()').extract()
         surfaces_areas_cleaned = [float(s.replace(" m", "").replace(" ","")) for s in surfaces_areas]
         if surfaces_areas_cleaned:
             item['surface_area'] = surfaces_areas_cleaned[0]
-        ges_list = response.xpath('//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "GES :")]/following-sibling::td/noscript/a/text()').extract()
+        ges_list = properties_elem.xpath('div/h2/span[contains(text(), "GES")]/following-sibling::span/a/text()').extract()
         if ges_list:
             ges_match = re.search("([A-I])\s+\(de \d+ \\xe0 \d+\)", ges_list[0])
             if ges_match:
                 item['ges'] = ges_match.group(1)
-        energy_classes = response.xpath(u'//div[contains(@class, "criterias")]/table/tr/th[contains(text(), "Classe énergie :")]/following-sibling::td/noscript/a/text()').extract()
+        energy_classes = properties_elem.xpath(u'div/h2/span[contains(text(), "Classe énergie")]/following-sibling::span/a/text()').extract()
         if energy_classes:
             energy_class_match = re.search("([A-I])\s+\(de \d+ \\xe0 \d+\)", energy_classes[0])
             if energy_class_match:
