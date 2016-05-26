@@ -70,13 +70,12 @@ class LeboncoinSpider(CrawlSpider):
             prices_cleaned = [float(s.replace(u"\xa0€", "").replace(" ", "").strip()) for s in prices]
             if prices_cleaned:
                 item['price'] = prices_cleaned[0]
-            photos = ad_elem.xpath('div[@class="lbc"]/div[@class="image"]/div[@class="image-and-nb"]/img/@src').extract()
+            photos = ad_elem.xpath('div[@class="item_image"]/span[@class="item_imagePic"]/span/@data-imgsrc').extract()
             if photos:
                 photo = LeboncoinSpider.add_scheme_if_missing(photos[0])
                 item['photo'] = photo
             request = scrapy.Request(link, callback=self.parse_item_details)
             request.meta['item'] = item
-            # yield item
             yield request
 
     def parse_item_details(self, response):
