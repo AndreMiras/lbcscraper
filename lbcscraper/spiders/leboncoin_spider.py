@@ -54,15 +54,15 @@ class LeboncoinSpider(CrawlSpider):
         return url
 
     def parse_items(self, response):
-        ads_elems = response.xpath('//div[@class="list-lbc"]/a')
+        ads_elems = response.xpath('//li/a[@class="list_item clearfix trackable"]')
         for ad_elem in ads_elems:
             item = LbcPropertyItem()
             links = ad_elem.xpath('@href').extract()
             link = links[0]
             link = LeboncoinSpider.add_scheme_if_missing(link)
             item['link'] = link
-            details_elem = ad_elem.xpath('div[@class="lbc"]/div[@class="detail"]')
-            titles = details_elem.xpath('h2[@class="title"]/text()').extract()
+            details_elem = ad_elem.xpath('section[@class="item_infos"]')
+            titles = details_elem.xpath('h2[@class="item_title"]/text()').extract()
             titles_cleaned = [s.strip() for s in titles]
             item['title'] = titles_cleaned[0]
             prices = details_elem.xpath('div[@class="price"]/text()').extract()
