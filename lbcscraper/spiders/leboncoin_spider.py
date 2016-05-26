@@ -54,7 +54,8 @@ class LeboncoinSpider(CrawlSpider):
         return url
 
     def parse_items(self, response):
-        ads_elems = response.xpath('//li/a[@class="list_item clearfix trackable"]')
+        # selects the middle ads list, but not the right side ads
+        ads_elems = response.xpath('//ul[@class="dontSwitch"]/li/a[@class="list_item clearfix trackable"]')
         for ad_elem in ads_elems:
             item = LbcPropertyItem()
             links = ad_elem.xpath('@href').extract()
