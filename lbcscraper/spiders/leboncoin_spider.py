@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import re
 import scrapy
 from urlparse import urlparse
@@ -138,8 +139,14 @@ class LeboncoinCarSpider(LeboncoinSpider):
     def parse_item_details(self, response):
         item = super(LeboncoinCarSpider, self).parse_item_details(response)
         properties_elem = response.xpath('//section[contains(@class, "properties")]')
+        # make
         makes = properties_elem.xpath('div/h2/span[contains(text(), "Marque")]/following-sibling::span/text()').extract()
         makes_cleaned = [s.replace(" ", "") for s in makes]
         if makes_cleaned:
             item['make'] = makes_cleaned[0]
+        # model
+        models = properties_elem.xpath('div/h2/span[contains(text(), "Modèle")]/following-sibling::span/text()').extract()
+        models_cleaned = [s.replace(" ", "") for s in models]
+        if models_cleaned:
+            item['model'] = models_cleaned[0]
         return item

@@ -22,3 +22,4 @@ class LbcPropertyItem(LbcItem):
 
 class LbcCarItem(LbcItem):
     make = Field()
+    model = Field()
