@@ -4,7 +4,7 @@ import scrapy
 from urlparse import urlparse
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors import LinkExtractor
-from lbcscraper.items import LbcPropertyItem
+from lbcscraper.items import LbcPropertyItem, LbcCarItem
 
 
 class LeboncoinSpider(CrawlSpider):
@@ -15,12 +15,12 @@ class LeboncoinSpider(CrawlSpider):
         Rule(LinkExtractor(allow=['\?o=\d']), callback='parse_items'),
     )
 
-    def __init__(self, *args, **kwargs): 
+    def __init__(self, *args, **kwargs):
         """
         Retrieves start_urls from command line options:
         scrapy crawl leboncoin -a start_urls="http://www.leboncoin.fr/vetements/offres/languedoc_roussillon/herault/,http://www.leboncoin.fr/vetements/offres/languedoc_roussillon/herault/"
         """
-        super(LeboncoinSpider, self).__init__(*args, **kwargs) 
+        super(LeboncoinSpider, self).__init__(*args, **kwargs)
         start_urls = kwargs.get('start_urls')
         self.start_urls = start_urls and start_urls.split(',') or []
 
@@ -57,7 +57,7 @@ class LeboncoinSpider(CrawlSpider):
         # selects the middle ads list, but not the right side ads
         ads_elems = response.xpath('//section[contains(@class, "mainList")]//ul/li/a[contains(@class, "list_item")]')
         for ad_elem in ads_elems:
-            item = LbcPropertyItem()
+            item = self.LbcItemType()
             links = ad_elem.xpath('@href').extract()
             link = links[0]
             link = LeboncoinSpider.add_scheme_if_missing(link)
@@ -95,6 +95,13 @@ class LeboncoinPropertySpider(LeboncoinSpider):
     """
     name = "leboncoin_property"
 
+    def __init__(self, *args, **kwargs):
+        """
+        Overrides the Item type to a LbcPropertyItem.
+        """
+        super(LeboncoinPropertySpider, self).__init__(*args, **kwargs)
+        self.LbcItemType = LbcPropertyItem
+
     def parse_item_details(self, response):
         item = super(LeboncoinPropertySpider, self).parse_item_details(response)
         properties_elem = response.xpath('//section[contains(@class, "properties")]')
@@ -112,4 +119,27 @@ class LeboncoinPropertySpider(LeboncoinSpider):
             energy_class_match = re.search("([A-I])\s+\(de \d+ \\xe0 \d+\)", energy_classes[0])
             if energy_class_match:
                 item['energy_class'] = energy_class_match.group(1)
+        return item
+
+
+class LeboncoinCarSpider(LeboncoinSpider):
+    """
+    scrapy crawl leboncoin_car -a start_urls="https://www.leboncoin.fr/voitures/offres/languedoc_roussillon/?th=1&location=Montpellier%2034000&parrot=0"
+    """
+    name = "leboncoin_car"
+
+    def __init__(self, *args, **kwargs):
+        """
+        Overrides the Item type to a LbcCarItem.
+        """
+        super(LeboncoinCarSpider, self).__init__(*args, **kwargs)
+        self.LbcItemType = LbcCarItem
+
+    def parse_item_details(self, response):
+        item = super(LeboncoinCarSpider, self).parse_item_details(response)
+        properties_elem = response.xpath('//section[contains(@class, "properties")]')
+        makes = properties_elem.xpath('div/h2/span[contains(text(), "Marque")]/following-sibling::span/text()').extract()
+        makes_cleaned = [s.replace(" ", "") for s in makes]
+        if makes_cleaned:
+            item['make'] = makes_cleaned[0]
         return item

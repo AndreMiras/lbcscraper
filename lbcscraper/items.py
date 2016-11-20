@@ -19,3 +19,6 @@ class LbcItem(Item):
 
 class LbcPropertyItem(LbcItem):
     surface_area = Field()
+
+class LbcCarItem(LbcItem):
+    make = Field()
