@@ -154,4 +154,9 @@ class LeboncoinCarSpider(LeboncoinSpider):
         mileages_cleaned = [int(s.lower().replace("km", "").replace(" ", "")) for s in mileages]
         if mileages_cleaned:
             item['mileage'] = mileages_cleaned[0]
+        # fuel
+        fuels = properties_elem.xpath('div/h2/span[contains(text(), "Carburant")]/following-sibling::span/text()').extract()
+        fuels_cleaned = [s.replace(" ", "") for s in fuels]
+        if fuels_cleaned:
+            item['fuel'] = fuels_cleaned[0]
         return item

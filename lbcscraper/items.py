@@ -24,3 +24,4 @@ class LbcCarItem(LbcItem):
     make = Field()
     model = Field()
     mileage = Field()
+    fuel = Field()
