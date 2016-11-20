@@ -107,7 +107,7 @@ class LeboncoinPropertySpider(LeboncoinSpider):
         item = super(LeboncoinPropertySpider, self).parse_item_details(response)
         properties_elem = response.xpath('//section[contains(@class, "properties")]')
         surfaces_areas = properties_elem.xpath('div/h2/span[contains(text(), "Surface")]/following-sibling::span/text()').extract()
-        surfaces_areas_cleaned = [float(s.replace(" m", "").replace(" ","")) for s in surfaces_areas]
+        surfaces_areas_cleaned = [float(s.replace(" m", "").replace(" ", "")) for s in surfaces_areas]
         if surfaces_areas_cleaned:
             item['surface_area'] = surfaces_areas_cleaned[0]
         ges_list = properties_elem.xpath('div/h2/span[contains(text(), "GES")]/following-sibling::span/a/text()').extract()
@@ -149,4 +149,9 @@ class LeboncoinCarSpider(LeboncoinSpider):
         models_cleaned = [s.replace(" ", "") for s in models]
         if models_cleaned:
             item['model'] = models_cleaned[0]
+        # mileage
+        mileages = properties_elem.xpath('div/h2/span[contains(text(), "Kilométrage")]/following-sibling::span/text()').extract()
+        mileages_cleaned = [int(s.lower().replace("km", "").replace(" ", "")) for s in mileages]
+        if mileages_cleaned:
+            item['mileage'] = mileages_cleaned[0]
         return item
