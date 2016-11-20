@@ -23,6 +23,7 @@ class LbcPropertyItem(LbcItem):
 class LbcCarItem(LbcItem):
     make = Field()
     model = Field()
+    year = Field()
     mileage = Field()
     fuel = Field()
     gearbox = Field()

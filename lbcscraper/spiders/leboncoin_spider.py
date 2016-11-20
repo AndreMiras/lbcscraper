@@ -149,6 +149,11 @@ class LeboncoinCarSpider(LeboncoinSpider):
         models_cleaned = [s.replace(" ", "") for s in models]
         if models_cleaned:
             item['model'] = models_cleaned[0]
+        # year
+        years = properties_elem.xpath('div/h2/span[contains(text(), "Année-modèle")]/following-sibling::span/text()').extract()
+        years_cleaned = [int(s.replace(" ", "").strip()) for s in years]
+        if years_cleaned:
+            item['year'] = years_cleaned[0]
         # mileage
         mileages = properties_elem.xpath('div/h2/span[contains(text(), "Kilométrage")]/following-sibling::span/text()').extract()
         mileages_cleaned = [int(s.lower().replace("km", "").replace(" ", "")) for s in mileages]
