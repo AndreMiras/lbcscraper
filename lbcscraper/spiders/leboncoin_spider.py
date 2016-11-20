@@ -159,4 +159,9 @@ class LeboncoinCarSpider(LeboncoinSpider):
         fuels_cleaned = [s.replace(" ", "") for s in fuels]
         if fuels_cleaned:
             item['fuel'] = fuels_cleaned[0]
+        # gearbox
+        gearboxes = properties_elem.xpath('div/h2/span[contains(text(), "Boîte de vitesse")]/following-sibling::span/text()').extract()
+        gearboxes_cleaned = [s.replace(" ", "") for s in gearboxes]
+        if gearboxes_cleaned:
+            item['gearbox'] = gearboxes_cleaned[0]
         return item

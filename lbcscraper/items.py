@@ -25,3 +25,4 @@ class LbcCarItem(LbcItem):
     model = Field()
     mileage = Field()
     fuel = Field()
+    gearbox = Field()
